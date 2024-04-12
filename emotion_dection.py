@@ -1,25 +1,31 @@
-import requests
-import json
+from flask import Flask, render_template, request
+from EmotionDetection.emotion_detection import emotion_detector
 
-def emotion_detector(text_to_analyse):
+app = Flask("Emotion Detector")
 
-    url = 'https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict'
-    headers = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
-    myobj = {"raw_document": { "text": text_to_analyse } }
-    response = requests.post(url, json = myobj, headers = headers)
-    status_code = response.status_code
-    
-    if status_code == 400:
-        formatted_output = { 'anger': None,
-                             'disgust': None,
-                             'fear': None,
-                             'joy': None,
-                             'sadness': None,
-                             'dominant_emotion': None }
+@app.route("/emotionDetector")
+def emotion_detector_function():
+    ''' This function calls the application
+    '''
+    test_to_analyze = request.args.get('textToAnalyze')
+    response = emotion_detector(text_to_analyze)
+
+    if response['dominant_emotion'] is None:
+        response_text = "Invalid Input! Please try again."
     else:
-        res = json.loads(response.text)
-        formatted_output = res[‘emotionPredictions’][0][‘emotion’]
-        dominant_emotion = max(formatted_response, key = lambda x: formatted_response[x])
-        formatted_response[‘dominant_dictionary’] = dominant_emotion
+        response_text = f"For the given statement, the system response is 'anger': \
+                    {response['anger']}, 'disgust': {response['disgust']}, \
+                    'fear': {response['fear']}, 'joy': {response['joy']}, \
+                    'sadness': {response['sadness']}. The dominant emotion is \
+                    {response['dominant_emotion']}."
 
-    return formatted_response 
+    return response_text
+
+@app.route("\")
+def render_index_page():
+    ''' This is the function to render the html interface
+    '''
+    return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run(host = "0.0.0.0", port = 5000)
