@@ -1,17 +1,22 @@
-import unittest
-from EmotionDetection.emotion_detection import emotion.detector
- 
-class TestEmotionDetector(unittest.TestCase):
-    def test_emotion_detector(self):
-        result1 = emotion.detector(“I am glad this happened”)
-        self.assertEqual(result1[‘dominant_emotion’], ’joy’)
-        result2 = emotion.detector(“I am really mad about this”)
-        self.assertEqual(result2[‘dominant_emotion’], ‘anger’)
-        result3 = emotion.detector(“I feel disgusted just hearing about this”)
-        self.assertEqual(result3[‘dominant_emotion’], ’ disgust’)
-        result4 = emotion.detector(“I am so sad about this”)
-        self.assertEqual(result4[‘dominant_emotion’], ’sadness’)
-        result5 = emotion.detector(“I am really afraid that this will happen”)
-        self.assertEqual(result5[‘dominant_emotion’], ’fear’)
+from flask import Flask, render_template, request
+from EmotionDetection.emotion_detection import emotion_detector
 
-unittest.main()
+app = Flask("Emotion Detector")
+
+@app.route("/emotionDetector")
+def emotion_detector_function():
+    test_to_analyze = request.args.get('textToAnalyze')
+    response = emotion_detector(text_to_analyze)
+    response_text = f"For the given statement, the system response is 'anger': \
+                    {response['anger']}, 'disgust': {response['disgust']}, \
+                    'fear': {response['fear']}, 'joy': {response['joy']}, \
+                    'sadness': {response['sadness']}. The dominant emotion is \
+                    {response['dominant_emotion']}."
+    return response_text
+
+@app.route("\")
+def render_index_page():
+    return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run(host = "0.0.0.0", port = 5000)
